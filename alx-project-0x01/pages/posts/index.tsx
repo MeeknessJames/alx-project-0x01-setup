@@ -1,39 +1,84 @@
-import PostCard from "@/components/common/PostCard";
-import Header from "@/components/layout/Header";
-import { PostProps } from "@/interfaces";
+// components/common/PostModal.tsx
+import React, { useState } from "react"; // Import useState
+import { PostData, PostModalProps } from "@/interfaces";
 
-interface PostsPageProps {
-  posts: PostProps[];
-}
+const PostModal = ({ onClose, onSubmit }: PostModalProps) => { // This line was adjusted in a previous fix
+  const [post, setPost] = useState<PostData>({
+    userId: 1,
+    title: "",
+    body: ""
+  });
 
-const Posts: React.FC<PostsPageProps> = ({ posts }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setPost((prevPost) => ({ ...prevPost, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(post);
+    onClose();
+  };
+
   return (
-    <div className="flex flex-col h-screen">
-      <Header />
-      <main className="p-4">
-        <div className="flex justify-between">
-          <h1 className=" text-2xl font-semibold">Post Content</h1>
-          <button className="bg-blue-700 px-4 py-2 rounded-full text-white">Add Post</button>
-        </div>
-        <div className="grid grid-cols-3 gap-2 ">
-          {posts?.map(({ title, body, userId, id }: PostProps, key: number) => (
-            <PostCard title={title} body={body} userId={userId} id={id} key={key} />
-          ))}
-        </div>
-      </main>
+    <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white rounded-lg p-8 shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">Add New Post</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="userId" className="block text-gray-700 font-medium mb-2">User ID</label>
+            <input
+              type="number"
+              id="userId"
+              name="userId"
+              value={post.userId}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="title" className="block text-gray-700 font-medium mb-2">Title</label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={post.title}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter post title"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="body" className="block text-gray-700 font-medium mb-2">Body</label>
+            <textarea
+              id="body"
+              name="body"
+              value={post.body}
+              onChange={handleChange}
+              rows={4}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter post content"
+            />
+          </div>
+          <div className="flex justify-between items-center mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 focus:outline-none"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              Add Post
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
 
-export async function getStaticProps() {
-  const response = await fetch("https://jsonplaceholder.typicode.com/posts");
-  const posts = await response.json();
-
-  return {
-    props: {
-      posts,
-    },
-  };
-}
-
-export default Posts;
+export default PostModal;
